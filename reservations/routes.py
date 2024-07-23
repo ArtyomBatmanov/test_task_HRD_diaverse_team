@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from database import get_db
+from database import get_db, SessionLocal
 from . import crud, schemas
 
 router = APIRouter()
@@ -18,9 +18,16 @@ def read_reservation(reservation_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Reservation not found")
     return db_reservation
 
-@router.post("/", response_model=schemas.Reservation)
-def create_reservation(reservation: schemas.ReservationCreate, db: Session = Depends(get_db)):
-    return crud.create_reservation(db=db, reservation=reservation)
+@router.post("/")
+async def create_reservation(reservation: schemas.ReservationCreate):
+    db: Session = SessionLocal()
+    try:
+        return crud.create_reservation(db=db, reservation=reservation)
+    except ValueError as e:
+        db.close()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        db.close()
 
 @router.put("/{reservation_id}", response_model=schemas.Reservation)
 def update_reservation(reservation_id: int, reservation: schemas.ReservationCreate, db: Session = Depends(get_db)):

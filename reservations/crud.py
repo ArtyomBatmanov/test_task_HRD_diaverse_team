@@ -7,8 +7,24 @@ def get_reservations(db: Session, skip: int = 0, limit: int = 10):
 def get_reservation(db: Session, reservation_id: int):
     return db.query(models.Reservation).filter(models.Reservation.id == reservation_id).first()
 
+
 def create_reservation(db: Session, reservation: schemas.ReservationCreate):
-    db_reservation = models.Reservation(**reservation.dict())
+    overlapping_reservations = db.query(models.Reservation).filter(
+        models.Reservation.book_id == reservation.book_id,
+        models.Reservation.start_date <= reservation.end_date,
+        models.Reservation.end_date >= reservation.start_date
+    ).all()
+
+    if overlapping_reservations:
+        raise ValueError("The book is already reserved for the selected date range.")
+
+    # Создание нового бронирования
+    db_reservation = models.Reservation(
+        book_id=reservation.book_id,
+        user_id=reservation.user_id,
+        start_date=reservation.start_date,
+        end_date=reservation.end_date
+    )
     db.add(db_reservation)
     db.commit()
     db.refresh(db_reservation)

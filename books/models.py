@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from database import Base
-from genres.models import Genre
 
 book_genre_association = Table(
     'book_genre', Base.metadata,

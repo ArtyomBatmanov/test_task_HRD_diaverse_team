@@ -7,8 +7,15 @@ class ReservationBase(BaseModel):
     start_date: date
     end_date: date
 
-class ReservationCreate(ReservationBase):
-    pass
+class ReservationCreate(BaseModel):
+    book_id: int
+    user_id: int
+    start_date: date
+    end_date: date
+
+    class Config:
+        from_attributes = True
+
 
 class Reservation(ReservationBase):
     id: int
