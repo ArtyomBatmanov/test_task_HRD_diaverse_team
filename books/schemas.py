@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 class BookBase(BaseModel):
     title: str
@@ -8,11 +8,23 @@ class BookBase(BaseModel):
     author_id: int
 
 class BookCreate(BookBase):
-    pass
+    genres: List[int]
 
 class Book(BookBase):
     id: int
     genres: List[int] = []
+
+    class Config:
+        from_attributes = True
+
+
+
+class BookUpdate(BaseModel):
+    title: Optional[str] = None
+    price: Optional[float] = None
+    page_count: Optional[int] = None
+    author_id: Optional[int] = None
+    genres: Optional[List[int]] = None
 
     class Config:
         from_attributes = True
